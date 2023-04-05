@@ -1,0 +1,22 @@
+.root {
+  background-color: var(--wo-gray);
+  height: 100vh;
+  padding: 20px;
+}
+
+.preparedImages {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+canvas {
+  width: 80%;
+  background-color: var(--wo-white);
+}
+
+.tool {
+  width: 350px;
+}
