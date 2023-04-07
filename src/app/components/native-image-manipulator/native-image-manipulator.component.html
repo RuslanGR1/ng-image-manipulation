@@ -32,8 +32,8 @@
     <div id="container"></div>
     <div class="actions">
       <h3>Actions for selected image:</h3>
-      <div class="action-priority">
-        <p>Layer Priority</p>
+      <div class="action action-priority">
+        <p class="action-title">Layer Priority</p>
         <button
           (click)="handlePriorityChange(priorityAction.Increase)"
           class="btn"
@@ -49,8 +49,8 @@
           Decrease Priority
         </button>
       </div>
-      <div class="action-opacity">
-        <p>Layer Opacity (0-1)</p>
+      <div class="action action-opacity">
+        <p class="action-title">Layer Opacity (0-1)</p>
         <div class="opacity-wrapper">
           <input
             #opacityInput
@@ -70,6 +70,15 @@
             Apply
           </button>
         </div>
+      </div>
+      <div class="action action-delete">
+        <button
+          [disabled]="!isDeleteButtonActive()"
+          class="btn delete-btn"
+          (click)="deleteImage()"
+        >
+          Delete selected Object
+        </button>
       </div>
     </div>
   </div>

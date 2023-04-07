@@ -66,6 +66,17 @@
   border-radius: 4px;
 }
 
+.action {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+}
+
+.action-opacity .action-title,
+.action-priority .action-title {
+  margin-right: 10px;
+}
+
 .btn:hover {
   cursor: pointer;
   background-color: var(--primary-hover);
@@ -101,6 +112,7 @@
   border-radius: 4px;
   font-size: 17px;
   border: 0;
+  padding-left: 10px;
 }
 
 .opacity-input:disabled {
@@ -109,4 +121,8 @@
 
 .opacity-input:focus-visible {
   outline: 0;
+}
+
+.delete-btn {
+  margin-top: 10px;
 }

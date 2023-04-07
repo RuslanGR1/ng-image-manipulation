@@ -157,6 +157,8 @@ export class NativeImageManipulatorComponent implements OnInit {
 
   deleteImage(): void {
     this.lastSelectedImage?.destroy();
+    this.clearSelectedNodes();
+    this.lastSelectedImage = undefined;
   }
 
   isPriorityButtonActive(action: ChangePriorityAction): boolean {
@@ -178,6 +180,10 @@ export class NativeImageManipulatorComponent implements OnInit {
     }
 
     return true;
+  }
+
+  isDeleteButtonActive(): boolean {
+    return !!this.lastSelectedImage;
   }
 
   setOpacity(): void {
