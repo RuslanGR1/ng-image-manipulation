@@ -30,7 +30,7 @@
       </button>
     </h3>
     <div id="container"></div>
-    <div class="actions">
+    <div *ngIf="!!this.lastSelectedImage" class="actions">
       <h3>Actions for selected image:</h3>
       <div class="action action-priority">
         <p class="action-title">Layer Priority</p>

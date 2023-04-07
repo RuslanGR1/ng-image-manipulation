@@ -124,5 +124,10 @@
 }
 
 .delete-btn {
+  background-color: var(--error-text);
   margin-top: 10px;
+}
+
+.delete-btn:hover {
+  background-color: var(--error-hover);
 }

@@ -6,6 +6,9 @@
   --white: #fff;
   --gray: #e9f0f8;
   --light-gray: #f2f3f5;
+  --red: #b33c3c;
+  --error-text: #cd344b;
+  --error-hover: #b93c3c;
 }
 
 body {
