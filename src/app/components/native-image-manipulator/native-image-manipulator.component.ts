@@ -4,6 +4,7 @@ import { Stage } from 'konva/lib/Stage';
 
 export enum UserAction {
   ClickTap = 'click tap',
+  KeyDown = 'keydown',
 }
 
 export enum ChangePriorityAction {
@@ -96,6 +97,10 @@ export class NativeImageManipulatorComponent implements OnInit {
 
       this._imageOffset += this.defaultNewImagePositionOffset;
       this._layer?.add(loadedImage);
+
+      const transformerIndex = this._transformer?.zIndex();
+      transformerIndex && this._transformer?.zIndex(transformerIndex + 1);
+
       this._transformer?.nodes([loadedImage]);
       this.lastSelectedImage = loadedImage;
       this.opacityInput?.nativeElement.setAttribute('value', '1');
@@ -114,6 +119,9 @@ export class NativeImageManipulatorComponent implements OnInit {
     if (!e.target.hasName(this.imageObjectName)) {
       return;
     }
+
+    const transformerIndex = this._transformer?.zIndex();
+    transformerIndex && this._transformer?.zIndex(transformerIndex + 1);
 
     this._transformer?.nodes([e.target]);
     this.lastSelectedImage = e.target;
@@ -145,6 +153,10 @@ export class NativeImageManipulatorComponent implements OnInit {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  deleteImage(): void {
+    this.lastSelectedImage?.destroy();
   }
 
   isPriorityButtonActive(action: ChangePriorityAction): boolean {
@@ -191,7 +203,9 @@ export class NativeImageManipulatorComponent implements OnInit {
     }
   }
 
-  private convertBase64 = (file: File) => {
+  private convertBase64 = (
+    file: File
+  ): Promise<string | ArrayBuffer | null> => {
     return new Promise((resolve, reject) => {
       const fileReader = new FileReader();
       fileReader.readAsDataURL(file);
