@@ -48,7 +48,7 @@ export class NativeImageManipulatorComponent implements OnInit {
     this.createAndConfigureStage();
     this.createTransformer();
     this.createAndConfigureLayer();
-    this.createBackground();
+    this.createBackgroundLayer();
 
     if (!this._stage || !this._layer || !this._backgrounLayer || !this._transformer) {
       return;
@@ -60,18 +60,18 @@ export class NativeImageManipulatorComponent implements OnInit {
 
   private imageOnLoadWrapper(image: HTMLImageElement): () => void {
     return () => {
-      const img_width = image.width;
-      const img_height = image.height;
+      const imgWidth = image.width;
+      const imgHeight = image.height;
 
       const max = 300;
-      const ratio = img_width > img_height ? img_width / max : img_height / max;
+      const ratio = imgWidth > imgHeight ? imgWidth / max : imgHeight / max;
 
       const loadedImage = new Konva.Image({
-        image: image,
+        image,
         x: this._imageOffset,
         y: 70,
-        width: img_width / ratio,
-        height: img_height / ratio,
+        width: imgWidth / ratio,
+        height: imgHeight / ratio,
         name: this.imageObjectName,
         draggable: true
       });
@@ -121,7 +121,7 @@ export class NativeImageManipulatorComponent implements OnInit {
     this._transformer?.nodes([]);
   }
 
-  private createBackground(): void {
+  private createBackgroundLayer(): void {
     this._backgrounLayer = new Konva.Rect({
       x: 0,
       y: 0,
@@ -163,7 +163,12 @@ export class NativeImageManipulatorComponent implements OnInit {
     return this.lastSelectedObject instanceof Konva.Text;
   }
 
-  addText(): void {
+  addOrChangeText(): void {
+    if (!this.noteText.trim()) {
+      this.noteText = '';
+      return;
+    }
+
     if (this.lastSelectedObject) {
       this.lastSelectedObject.setAttr('text', this.noteText);
       return;

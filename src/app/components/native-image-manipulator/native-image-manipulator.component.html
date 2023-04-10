@@ -76,7 +76,7 @@
       <div class="text-nots">
         <h3 class="actions-title">Addition text:</h3>
         <input [(ngModel)]="noteText" #ctrl="ngModel" class="default-input note-input" />
-        <button (click)="addText()" class="btn btn-ml text-add-button">
+        <button (click)="addOrChangeText()" class="btn btn-ml text-add-button">
           <p *ngIf="isTextNodeSelected()">Change text</p>
           <p *ngIf="!isTextNodeSelected()">Add new text</p>
         </button>
