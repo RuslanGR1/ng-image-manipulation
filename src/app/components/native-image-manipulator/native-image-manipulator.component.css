@@ -83,7 +83,7 @@
 }
 
 .btn:disabled {
-  background-color: var(--primary-disabled);
+  background-color: var(--primary-disabled) !important;
   cursor: default;
 }
 
@@ -92,7 +92,7 @@
   background-color: var(--primary-hover);
 }
 
-.upload-button {
+.btn-ml {
   margin-left: 10px;
 }
 
@@ -101,18 +101,14 @@
   background-color: var(--primary-hover);
 }
 
-.opacity-btn,
-.btn-second {
-  margin-left: 10px;
-}
-
-.opacity-input {
+.default-input {
   width: 100px;
   height: 34px;
   border-radius: 4px;
   font-size: 17px;
   border: 0;
   padding-left: 10px;
+  padding-right: 10px;
 }
 
 .opacity-input:disabled {
@@ -130,4 +126,27 @@
 
 .delete-btn:hover {
   background-color: var(--error-hover);
+}
+
+.bottom-line {
+  margin-top: 20px;
+  display: flex;
+  gap: 40px;
+}
+
+.actions-title {
+  margin-top: 0;
+}
+
+.note-input {
+  width: 350px;
+  margin-top: 7px;
+}
+
+.text-add-button p {
+  margin: 0;
+}
+
+.default-input:focus-visible {
+  outline: 0;
 }

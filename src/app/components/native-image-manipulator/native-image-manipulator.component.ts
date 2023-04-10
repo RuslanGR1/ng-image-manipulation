@@ -1,10 +1,11 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import Konva from 'konva';
 import { Stage } from 'konva/lib/Stage';
 
 export enum UserAction {
   ClickTap = 'click tap',
   KeyDown = 'keydown',
+  Transform = 'transform',
 }
 
 export enum ChangePriorityAction {
@@ -18,20 +19,21 @@ export enum ChangePriorityAction {
   styleUrls: ['./native-image-manipulator.component.css'],
 })
 export class NativeImageManipulatorComponent implements OnInit {
-  @ViewChild('opacityInput') opacityInput?: ElementRef<HTMLInputElement>;
-
   private _stage: Stage | undefined;
   private _layer: Konva.Layer | undefined;
   private _transformer: Konva.Transformer | undefined;
   private _imageOffset: number = 50;
   private _backgrounLayer: Konva.Rect | undefined;
 
-  lastSelectedImage: Stage | Konva.Shape | undefined;
+  lastSelectedObject: Stage | Konva.Shape | undefined;
   priorityAction = ChangePriorityAction;
   imageUrls: string[] = [];
+  noteText: string = '';
+  opacityText: string = '';
 
   private readonly resultImageName = 'stage.png';
   private readonly imageObjectName = 'image';
+  private readonly textObjectName = 'text';
   private readonly defaultBackgroundColor = '#FFFFFF';
   private readonly defaultNewImagePositionOffset = 50;
 
@@ -102,21 +104,25 @@ export class NativeImageManipulatorComponent implements OnInit {
       transformerIndex && this._transformer?.zIndex(transformerIndex + 1);
 
       this._transformer?.nodes([loadedImage]);
-      this.lastSelectedImage = loadedImage;
-      this.opacityInput?.nativeElement.setAttribute('value', '1');
+      this.opacityText = '1';
+      this.lastSelectedObject = loadedImage;
     };
   }
 
   private stageOnClickTap(e: Konva.KonvaEventObject<any>): void {
     if (e.target === this._backgrounLayer) {
       this.clearSelectedNodes();
-      this.lastSelectedImage = undefined;
-
-      this.opacityInput?.nativeElement.setAttribute('value', '1');
+      this.lastSelectedObject = undefined;
+      this.noteText = '';
+      this.opacityText = '';
       return;
     }
 
-    if (!e.target.hasName(this.imageObjectName)) {
+    if (
+      !e.target.hasName(this.imageObjectName) &&
+      !e.target.hasName(this.textObjectName)
+    ) {
+      this.noteText = '';
       return;
     }
 
@@ -124,20 +130,53 @@ export class NativeImageManipulatorComponent implements OnInit {
     transformerIndex && this._transformer?.zIndex(transformerIndex + 1);
 
     this._transformer?.nodes([e.target]);
-    this.lastSelectedImage = e.target;
-    const currentOpacity = this.lastSelectedImage?.opacity();
+    this.lastSelectedObject = e.target;
 
-    if (!currentOpacity) {
+    if (e.target.hasName(this.textObjectName)) {
+      this.noteText = e.target.getAttr('text');
       return;
     }
-    this.opacityInput?.nativeElement.setAttribute(
-      'value',
-      String(currentOpacity)
-    );
+
+    const currentOpacity = this.lastSelectedObject?.opacity();
+    this.opacityText = String(currentOpacity);
   }
 
   private clearSelectedNodes(): void {
     this._transformer?.nodes([]);
+  }
+
+  isNodeSelected(): boolean {
+    return !!this.lastSelectedObject;
+  }
+
+  isTextNodeSelected(): boolean {
+    return this.lastSelectedObject instanceof Konva.Text;
+  }
+
+  addText(): void {
+    if (this.lastSelectedObject) {
+      this.lastSelectedObject.setAttr('text', this.noteText);
+      return;
+    }
+
+    const text = new Konva.Text({
+      x: 50,
+      y: 50,
+      text: this.noteText,
+      draggable: true,
+      name: this.textObjectName,
+    });
+    text.on(UserAction.Transform, () => {
+      text.setAttrs({
+        width: Math.max(text.width() * text.scaleX(), 20),
+        scaleX: 1,
+        scaleY: 1,
+      });
+    });
+
+    this._layer?.add(text);
+    this.clearSelectedNodes();
+    this._transformer?.nodes([text]);
   }
 
   exportImage(): void {
@@ -156,17 +195,17 @@ export class NativeImageManipulatorComponent implements OnInit {
   }
 
   deleteImage(): void {
-    this.lastSelectedImage?.destroy();
+    this.lastSelectedObject?.destroy();
     this.clearSelectedNodes();
-    this.lastSelectedImage = undefined;
+    this.lastSelectedObject = undefined;
   }
 
   isPriorityButtonActive(action: ChangePriorityAction): boolean {
-    if (!this.lastSelectedImage) {
+    if (!this.lastSelectedObject) {
       return false;
     }
 
-    const currentIndex = this.lastSelectedImage.zIndex();
+    const currentIndex = this.lastSelectedObject.zIndex();
     if (action === ChangePriorityAction.Decrease && currentIndex - 1 === 0) {
       return false;
     }
@@ -175,7 +214,7 @@ export class NativeImageManipulatorComponent implements OnInit {
   }
 
   isOpacityButtonActive(): boolean {
-    if (!this.lastSelectedImage) {
+    if (!this.lastSelectedObject) {
       return false;
     }
 
@@ -183,28 +222,27 @@ export class NativeImageManipulatorComponent implements OnInit {
   }
 
   isDeleteButtonActive(): boolean {
-    return !!this.lastSelectedImage;
+    return !!this.lastSelectedObject;
   }
 
   setOpacity(): void {
-    if (!this.lastSelectedImage) {
+    if (!this.lastSelectedObject) {
       return;
     }
-    const opacity = this.opacityInput?.nativeElement.value;
-    opacity && this.lastSelectedImage.opacity(Number(opacity));
+    this.lastSelectedObject.opacity(Number(this.opacityText));
   }
 
   handlePriorityChange(action: ChangePriorityAction): void {
-    if (!this.lastSelectedImage) {
+    if (!this.lastSelectedObject) {
       return;
     }
-    const currentIndex = this.lastSelectedImage.zIndex();
+    const currentIndex = this.lastSelectedObject.zIndex();
     switch (action) {
       case ChangePriorityAction.Increase:
-        this.lastSelectedImage.zIndex(currentIndex + 1);
+        this.lastSelectedObject.zIndex(currentIndex + 1);
         return;
       case ChangePriorityAction.Decrease:
-        this.lastSelectedImage.zIndex(currentIndex - 1);
+        this.lastSelectedObject.zIndex(currentIndex - 1);
         return;
     }
   }
