@@ -14,9 +14,7 @@
         onclick="this.value=null;"
         hidden
       />
-      <label class="upload-button btn btn-ml" for="actual-btn"
-        >Choose File</label
-      >
+      <label class="upload-button btn btn-ml" for="actual-btn">Choose File</label>
     </div>
 
     <div class="availableImages">
@@ -27,9 +25,7 @@
   <div>
     <h3 class="preview">
       Page preview
-      <button class="export-btn btn" (click)="exportImage()">
-        Export result image
-      </button>
+      <button class="export-btn btn" (click)="exportImage()">Export result image</button>
     </h3>
     <div id="container"></div>
     <div class="bottom-line">
@@ -66,32 +62,20 @@
               name="opacity"
               id="opacity"
             />
-            <button
-              class="btn opacity-btn btn-ml"
-              (click)="setOpacity()"
-              [disabled]="!isOpacityButtonActive()"
-            >
+            <button class="btn opacity-btn btn-ml" (click)="setOpacity()" [disabled]="!isOpacityButtonActive()">
               Apply
             </button>
           </div>
         </div>
         <div class="action action-delete">
-          <button
-            [disabled]="!isDeleteButtonActive()"
-            class="btn delete-btn btn-ml"
-            (click)="deleteImage()"
-          >
+          <button [disabled]="!isDeleteButtonActive()" class="btn delete-btn btn-ml" (click)="deleteSelectedObject()">
             Delete selected Object
           </button>
         </div>
       </div>
       <div class="text-nots">
         <h3 class="actions-title">Addition text:</h3>
-        <input
-          [(ngModel)]="noteText"
-          #ctrl="ngModel"
-          class="default-input note-input"
-        />
+        <input [(ngModel)]="noteText" #ctrl="ngModel" class="default-input note-input" />
         <button (click)="addText()" class="btn btn-ml text-add-button">
           <p *ngIf="isTextNodeSelected()">Change text</p>
           <p *ngIf="!isTextNodeSelected()">Add new text</p>

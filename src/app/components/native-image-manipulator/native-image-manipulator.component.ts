@@ -195,7 +195,8 @@ export class NativeImageManipulatorComponent implements OnInit {
     this.imageManipulatorService.exportImage(dataURL, this.resultImageName);
   }
 
-  deleteImage(): void {
+  deleteSelectedObject(): void {
+    this.noteText = '';
     this.lastSelectedObject?.destroy();
     this.clearSelectedNodes();
     this.lastSelectedObject = undefined;
