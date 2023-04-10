@@ -1,22 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import Konva from 'konva';
 import { Stage } from 'konva/lib/Stage';
+import { ImageManipulatorService } from './native-image-manipulator.service';
 
 export enum UserAction {
   ClickTap = 'click tap',
   KeyDown = 'keydown',
-  Transform = 'transform',
+  Transform = 'transform'
 }
 
 export enum ChangePriorityAction {
   Increase = 'increase',
-  Decrease = 'decrease',
+  Decrease = 'decrease'
 }
 
 @Component({
   selector: 'app-native-image-manipulator',
   templateUrl: './native-image-manipulator.component.html',
-  styleUrls: ['./native-image-manipulator.component.css'],
+  styleUrls: ['./native-image-manipulator.component.css']
 })
 export class NativeImageManipulatorComponent implements OnInit {
   private _stage: Stage | undefined;
@@ -37,46 +38,24 @@ export class NativeImageManipulatorComponent implements OnInit {
   private readonly defaultBackgroundColor = '#FFFFFF';
   private readonly defaultNewImagePositionOffset = 50;
 
-  constructor() {}
+  constructor(private readonly imageManipulatorService: ImageManipulatorService) {}
 
-  private getBackground(): Konva.Rect {
-    this._backgrounLayer = new Konva.Rect({
-      x: 0,
-      y: 0,
-      width: this._stage?.width(),
-      height: this._stage?.height(),
-      fill: this.defaultBackgroundColor,
-      draggable: false,
-    });
-    this._backgrounLayer.zIndex(0);
-    return this._backgrounLayer;
+  private createAndConfigureLayer(): void {
+    this._layer = new Konva.Layer();
   }
 
   ngOnInit(): void {
-    this._stage = new Stage({
-      container: 'container',
-      width: 1000,
-      height: 600,
-    });
+    this.createAndConfigureStage();
+    this.createTransformer();
+    this.createAndConfigureLayer();
+    this.createBackground();
 
-    this._layer = new Konva.Layer();
+    if (!this._stage || !this._layer || !this._backgrounLayer || !this._transformer) {
+      return;
+    }
     this._stage.add(this._layer);
-    this._layer.add(this.getBackground());
-
-    this._transformer = new Konva.Transformer({
-      nodes: [],
-      keepRatio: false,
-      boundBoxFunc: (oldBox, newBox) => {
-        if (newBox.width < 10 || newBox.height < 10) {
-          return oldBox;
-        }
-        return newBox;
-      },
-    });
-    this._transformer.zIndex(0);
-    this._layer?.add(this._transformer);
-
-    this._stage.on(UserAction.ClickTap, (e) => this.stageOnClickTap(e));
+    this._layer.add(this._backgrounLayer);
+    this._layer.add(this._transformer);
   }
 
   private imageOnLoadWrapper(image: HTMLImageElement): () => void {
@@ -94,7 +73,7 @@ export class NativeImageManipulatorComponent implements OnInit {
         width: img_width / ratio,
         height: img_height / ratio,
         name: this.imageObjectName,
-        draggable: true,
+        draggable: true
       });
 
       this._imageOffset += this.defaultNewImagePositionOffset;
@@ -118,10 +97,7 @@ export class NativeImageManipulatorComponent implements OnInit {
       return;
     }
 
-    if (
-      !e.target.hasName(this.imageObjectName) &&
-      !e.target.hasName(this.textObjectName)
-    ) {
+    if (!e.target.hasName(this.imageObjectName) && !e.target.hasName(this.textObjectName)) {
       this.noteText = '';
       return;
     }
@@ -145,6 +121,40 @@ export class NativeImageManipulatorComponent implements OnInit {
     this._transformer?.nodes([]);
   }
 
+  private createBackground(): void {
+    this._backgrounLayer = new Konva.Rect({
+      x: 0,
+      y: 0,
+      width: this._stage?.width(),
+      height: this._stage?.height(),
+      fill: this.defaultBackgroundColor,
+      draggable: false
+    });
+    this._backgrounLayer.zIndex(0);
+  }
+
+  private createAndConfigureStage(): void {
+    this._stage = new Stage({
+      container: 'container',
+      width: 1000,
+      height: 600
+    });
+    this._stage.on(UserAction.ClickTap, (e) => this.stageOnClickTap(e));
+  }
+
+  private createTransformer(): void {
+    this._transformer = new Konva.Transformer({
+      nodes: [],
+      keepRatio: false,
+      boundBoxFunc: (oldBox, newBox) => {
+        if (newBox.width < 10 || newBox.height < 10) {
+          return oldBox;
+        }
+        return newBox;
+      }
+    });
+  }
+
   isNodeSelected(): boolean {
     return !!this.lastSelectedObject;
   }
@@ -164,13 +174,13 @@ export class NativeImageManipulatorComponent implements OnInit {
       y: 50,
       text: this.noteText,
       draggable: true,
-      name: this.textObjectName,
+      name: this.textObjectName
     });
     text.on(UserAction.Transform, () => {
       text.setAttrs({
         width: Math.max(text.width() * text.scaleX(), 20),
         scaleX: 1,
-        scaleY: 1,
+        scaleY: 1
       });
     });
 
@@ -180,18 +190,9 @@ export class NativeImageManipulatorComponent implements OnInit {
   }
 
   exportImage(): void {
-    const name = this.resultImageName;
     this.clearSelectedNodes();
     const dataURL = this._stage?.toDataURL({ pixelRatio: 3 });
-    var link = document.createElement('a');
-    link.download = name;
-    if (!dataURL) {
-      return;
-    }
-    link.href = dataURL;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    this.imageManipulatorService.exportImage(dataURL, this.resultImageName);
   }
 
   deleteImage(): void {
@@ -209,7 +210,6 @@ export class NativeImageManipulatorComponent implements OnInit {
     if (action === ChangePriorityAction.Decrease && currentIndex - 1 === 0) {
       return false;
     }
-
     return true;
   }
 
@@ -217,7 +217,6 @@ export class NativeImageManipulatorComponent implements OnInit {
     if (!this.lastSelectedObject) {
       return false;
     }
-
     return true;
   }
 
@@ -247,27 +246,10 @@ export class NativeImageManipulatorComponent implements OnInit {
     }
   }
 
-  private convertBase64 = (
-    file: File
-  ): Promise<string | ArrayBuffer | null> => {
-    return new Promise((resolve, reject) => {
-      const fileReader = new FileReader();
-      fileReader.readAsDataURL(file);
-
-      fileReader.onload = () => {
-        resolve(fileReader.result);
-      };
-
-      fileReader.onerror = (error) => {
-        reject(error);
-      };
-    });
-  };
-
   async processFile(imageInput: any): Promise<void> {
     this.clearSelectedNodes();
     const file: File = imageInput.files[0];
-    const baseImg = await this.convertBase64(file);
+    const baseImg = await this.imageManipulatorService.convertBase64(file);
     this.imageUrls.push(baseImg as string);
     const URL = window.webkitURL || window.URL;
     const url = URL.createObjectURL(file);
