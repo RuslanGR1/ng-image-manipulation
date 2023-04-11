@@ -3,15 +3,34 @@ import Konva from 'konva';
 import { Stage } from 'konva/lib/Stage';
 import { ImageManipulatorService } from './native-image-manipulator.service';
 
-export enum UserAction {
+interface RGBColor {
+  R: number;
+  G: number;
+  B: number;
+}
+
+const DEFAULT_IMAGE_OPACITY = 1;
+const COLOR_TO_MAKE_TRANSPARENT: RGBColor = {
+  R: 255,
+  G: 255,
+  B: 255
+};
+
+enum UserAction {
   ClickTap = 'click tap',
   KeyDown = 'keydown',
   Transform = 'transform'
 }
 
-export enum ChangePriorityAction {
+enum ChangePriorityAction {
   Increase = 'increase',
   Decrease = 'decrease'
+}
+
+interface ImageBackgroundOpacityParams {
+  image: HTMLImageElement;
+  imgWidth: number;
+  imgHeight: number;
 }
 
 @Component({
@@ -40,10 +59,6 @@ export class NativeImageManipulatorComponent implements OnInit {
 
   constructor(private readonly imageManipulatorService: ImageManipulatorService) {}
 
-  private createAndConfigureLayer(): void {
-    this._layer = new Konva.Layer();
-  }
-
   ngOnInit(): void {
     this.createAndConfigureStage();
     this.createTransformer();
@@ -58,6 +73,41 @@ export class NativeImageManipulatorComponent implements OnInit {
     this._layer.add(this._transformer);
   }
 
+  private setImageBackgroundOpacity(
+    imageBackgroundOpacityParams: ImageBackgroundOpacityParams
+  ): HTMLCanvasElement | undefined {
+    const { image, imgWidth, imgHeight } = imageBackgroundOpacityParams;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = imgWidth;
+    canvas.height = imgHeight;
+
+    const context = canvas.getContext('2d');
+    if (!context) {
+      return;
+    }
+
+    context.drawImage(image, 0, 0);
+    const imgData = context.getImageData(0, 0, imgWidth, imgHeight);
+    const data = imgData.data;
+
+    if (data) {
+      for (var x = 0; x < data.length; x += 4) {
+        const opacityIndex = x + 3;
+        if (this.isColorToMakeTransparent(data[x], data[x + 1], data[x + 2])) {
+          data[opacityIndex] = 0;
+        }
+      }
+    }
+
+    context.putImageData(imgData, 0, 0);
+    return canvas;
+  }
+
+  private isColorToMakeTransparent(r: number, g: number, b: number): boolean {
+    return r == COLOR_TO_MAKE_TRANSPARENT.R && g == COLOR_TO_MAKE_TRANSPARENT.G && b == COLOR_TO_MAKE_TRANSPARENT.B;
+  }
+
   private imageOnLoadWrapper(image: HTMLImageElement): () => void {
     return () => {
       const imgWidth = image.width;
@@ -66,8 +116,10 @@ export class NativeImageManipulatorComponent implements OnInit {
       const max = 300;
       const ratio = imgWidth > imgHeight ? imgWidth / max : imgHeight / max;
 
+      let convertedImage = this.setImageBackgroundOpacity({ image, imgWidth, imgHeight }) || image;
+
       const loadedImage = new Konva.Image({
-        image,
+        image: convertedImage,
         x: this._imageOffset,
         y: 70,
         width: imgWidth / ratio,
@@ -83,7 +135,7 @@ export class NativeImageManipulatorComponent implements OnInit {
       transformerIndex && this._transformer?.zIndex(transformerIndex + 1);
 
       this._transformer?.nodes([loadedImage]);
-      this.opacityText = '1';
+      this.opacityText = String(DEFAULT_IMAGE_OPACITY);
       this.lastSelectedObject = loadedImage;
     };
   }
@@ -142,10 +194,14 @@ export class NativeImageManipulatorComponent implements OnInit {
     this._stage.on(UserAction.ClickTap, (e) => this.stageOnClickTap(e));
   }
 
+  private createAndConfigureLayer(): void {
+    this._layer = new Konva.Layer();
+  }
+
   private createTransformer(): void {
     this._transformer = new Konva.Transformer({
       nodes: [],
-      keepRatio: false,
+      keepRatio: true,
       boundBoxFunc: (oldBox, newBox) => {
         if (newBox.width < 10 || newBox.height < 10) {
           return oldBox;
