@@ -1,37 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import Konva from 'konva';
 import { Stage } from 'konva/lib/Stage';
+import { Box } from 'konva/lib/shapes/Transformer';
+import {
+  defaultImagePositionPoint,
+  defaultTextPositionPoint,
+  DEFAULT_IMAGE_OPACITY
+} from './native-image-manipulator.const';
 import { ImageManipulatorService } from './native-image-manipulator.service';
-
-interface RGBColor {
-  R: number;
-  G: number;
-  B: number;
-}
-
-const DEFAULT_IMAGE_OPACITY = 1;
-const COLOR_TO_MAKE_TRANSPARENT: RGBColor = {
-  R: 255,
-  G: 255,
-  B: 255
-};
-
-enum UserAction {
-  ClickTap = 'click tap',
-  KeyDown = 'keydown',
-  Transform = 'transform'
-}
-
-enum ChangePriorityAction {
-  Increase = 'increase',
-  Decrease = 'decrease'
-}
-
-interface ImageBackgroundOpacityParams {
-  image: HTMLImageElement;
-  imgWidth: number;
-  imgHeight: number;
-}
+import { ChangePriorityAction, ImageBackgroundOpacityParams, UserAction } from './native-image-manipulator.type';
 
 @Component({
   selector: 'app-native-image-manipulator',
@@ -54,7 +31,7 @@ export class NativeImageManipulatorComponent implements OnInit {
   private readonly resultImageName = 'stage.png';
   private readonly imageObjectName = 'image';
   private readonly textObjectName = 'text';
-  private readonly defaultBackgroundColor = '#FFFFFF';
+  private readonly defaultCanvasBackgroundColor = '#FFFFFF';
   private readonly defaultNewImagePositionOffset = 50;
 
   constructor(private readonly imageManipulatorService: ImageManipulatorService) {}
@@ -94,7 +71,7 @@ export class NativeImageManipulatorComponent implements OnInit {
     if (data) {
       for (var x = 0; x < data.length; x += 4) {
         const opacityIndex = x + 3;
-        if (this.isColorToMakeTransparent(data[x], data[x + 1], data[x + 2])) {
+        if (this.imageManipulatorService.isColorToMakeTransparent(data[x], data[x + 1], data[x + 2])) {
           data[opacityIndex] = 0;
         }
       }
@@ -102,10 +79,6 @@ export class NativeImageManipulatorComponent implements OnInit {
 
     context.putImageData(imgData, 0, 0);
     return canvas;
-  }
-
-  private isColorToMakeTransparent(r: number, g: number, b: number): boolean {
-    return r == COLOR_TO_MAKE_TRANSPARENT.R && g == COLOR_TO_MAKE_TRANSPARENT.G && b == COLOR_TO_MAKE_TRANSPARENT.B;
   }
 
   private imageOnLoadWrapper(image: HTMLImageElement): () => void {
@@ -120,21 +93,25 @@ export class NativeImageManipulatorComponent implements OnInit {
 
       const loadedImage = new Konva.Image({
         image: convertedImage,
-        x: this._imageOffset,
-        y: 70,
+        x: defaultImagePositionPoint.x,
+        y: defaultImagePositionPoint.y,
         width: imgWidth / ratio,
         height: imgHeight / ratio,
         name: this.imageObjectName,
         draggable: true
       });
 
+      if (!this._layer || !this._transformer) {
+        return;
+      }
+
       this._imageOffset += this.defaultNewImagePositionOffset;
-      this._layer?.add(loadedImage);
+      this._layer.add(loadedImage);
 
-      const transformerIndex = this._transformer?.zIndex();
-      transformerIndex && this._transformer?.zIndex(transformerIndex + 1);
+      const transformerIndex = this._transformer.zIndex();
+      transformerIndex && this._transformer.zIndex(transformerIndex + 1);
 
-      this._transformer?.nodes([loadedImage]);
+      this._transformer.nodes([loadedImage]);
       this.opacityText = String(DEFAULT_IMAGE_OPACITY);
       this.lastSelectedObject = loadedImage;
     };
@@ -179,7 +156,7 @@ export class NativeImageManipulatorComponent implements OnInit {
       y: 0,
       width: this._stage?.width(),
       height: this._stage?.height(),
-      fill: this.defaultBackgroundColor,
+      fill: this.defaultCanvasBackgroundColor,
       draggable: false
     });
     this._backgrounLayer.zIndex(0);
@@ -199,15 +176,19 @@ export class NativeImageManipulatorComponent implements OnInit {
   }
 
   private createTransformer(): void {
+    const boundBoxFunc = (oldBox: Box, newBox: Box): Box => {
+      if (newBox.width < 10 || newBox.height < 10) {
+        return oldBox;
+      }
+      return newBox;
+    };
+
     this._transformer = new Konva.Transformer({
       nodes: [],
+      enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
       keepRatio: true,
-      boundBoxFunc: (oldBox, newBox) => {
-        if (newBox.width < 10 || newBox.height < 10) {
-          return oldBox;
-        }
-        return newBox;
-      }
+      resizeEnabled: false,
+      boundBoxFunc
     });
   }
 
@@ -231,8 +212,8 @@ export class NativeImageManipulatorComponent implements OnInit {
     }
 
     const text = new Konva.Text({
-      x: 50,
-      y: 50,
+      x: defaultTextPositionPoint.x,
+      y: defaultTextPositionPoint.y,
       text: this.noteText,
       draggable: true,
       name: this.textObjectName

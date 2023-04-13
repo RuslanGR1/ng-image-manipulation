@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { COLOR_TO_MAKE_TRANSPARENT } from './native-image-manipulator.const';
 
 @Injectable({
   providedIn: 'root'
@@ -28,5 +29,9 @@ export class ImageManipulatorService {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  isColorToMakeTransparent(r: number, g: number, b: number): boolean {
+    return r == COLOR_TO_MAKE_TRANSPARENT.R && g == COLOR_TO_MAKE_TRANSPARENT.G && b == COLOR_TO_MAKE_TRANSPARENT.B;
   }
 }
