@@ -68,18 +68,32 @@
           </div>
         </div>
         <div class="action action-delete">
-          <button [disabled]="!isDeleteButtonActive()" class="btn delete-btn btn-ml" (click)="deleteSelectedObject()">
+          <button [disabled]="!isDeleteButtonActive()" class="btn delete-btn" (click)="deleteSelectedObject()">
             Delete selected Object
           </button>
         </div>
       </div>
-      <div class="text-nots">
-        <h3 class="actions-title">Addition text:</h3>
-        <input [(ngModel)]="noteText" #ctrl="ngModel" class="default-input note-input" />
-        <button (click)="addOrChangeText()" class="btn btn-ml text-add-button">
-          <p *ngIf="isTextNodeSelected()">Change text</p>
-          <p *ngIf="!isTextNodeSelected()">Add new text</p>
-        </button>
+      <div class="actions-right">
+        <div class="text-nots">
+          <h3 class="actions-title">Addition text:</h3>
+          <input [(ngModel)]="noteText" #ctrl="ngModel" class="default-input note-input" />
+          <button (click)="addOrChangeText()" class="btn btn-ml text-add-button">
+            <p *ngIf="isTextNodeSelected()">Change text</p>
+            <p *ngIf="!isTextNodeSelected()">Add new text</p>
+          </button>
+        </div>
+        <div class="action-toggle-resize d-flex align-center">
+          <p>Scaling state</p>
+          <button
+            (click)="toggleScale()"
+            class="btn btn-ml resize-btn"
+            [disabled]="!isDeleteButtonActive()"
+            [ngClass]="{locked: !isResizeEnabled()}"
+          >
+            <p class="m-0" *ngIf="isResizeEnabled()">Unlocked</p>
+            <p class="m-0" *ngIf="!isResizeEnabled()">Locked</p>
+          </button>
+        </div>
       </div>
     </div>
   </div>

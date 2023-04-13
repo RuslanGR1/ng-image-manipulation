@@ -28,6 +28,8 @@ export class NativeImageManipulatorComponent implements OnInit {
   noteText: string = '';
   opacityText: string = '';
 
+  private readonly resizeEnabledAttr = 'resizeEnabled';
+
   private readonly resultImageName = 'stage.png';
   private readonly imageObjectName = 'image';
   private readonly textObjectName = 'text';
@@ -100,6 +102,7 @@ export class NativeImageManipulatorComponent implements OnInit {
         name: this.imageObjectName,
         draggable: true
       });
+      loadedImage.setAttr(this.resizeEnabledAttr, false);
 
       if (!this._layer || !this._transformer) {
         return;
@@ -129,6 +132,11 @@ export class NativeImageManipulatorComponent implements OnInit {
     if (!e.target.hasName(this.imageObjectName) && !e.target.hasName(this.textObjectName)) {
       this.noteText = '';
       return;
+    }
+
+    if (e.target.hasName(this.imageObjectName)) {
+      const scaleEnabld = e.target?.getAttr(this.resizeEnabledAttr);
+      this._transformer?.resizeEnabled(scaleEnabld);
     }
 
     const transformerIndex = this._transformer?.zIndex();
@@ -192,12 +200,25 @@ export class NativeImageManipulatorComponent implements OnInit {
     });
   }
 
+  isResizeEnabled(): boolean {
+    return this.lastSelectedObject?.getAttr(this.resizeEnabledAttr);
+  }
+
   isNodeSelected(): boolean {
     return !!this.lastSelectedObject;
   }
 
   isTextNodeSelected(): boolean {
     return this.lastSelectedObject instanceof Konva.Text;
+  }
+
+  toggleScale(): void {
+    if (!this.lastSelectedObject) {
+      return;
+    }
+    const scaleEnabld = this.lastSelectedObject.getAttr(this.resizeEnabledAttr);
+    this.lastSelectedObject.setAttr(this.resizeEnabledAttr, !scaleEnabld);
+    this._transformer?.resizeEnabled(!scaleEnabld);
   }
 
   addOrChangeText(): void {

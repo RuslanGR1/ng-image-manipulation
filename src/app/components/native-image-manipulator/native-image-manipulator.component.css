@@ -150,3 +150,27 @@
 .default-input:focus-visible {
   outline: 0;
 }
+
+.d-flex {
+  display: flex;
+}
+
+.content-center {
+  justify-content: center;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.action-toggle-resize {
+  margin-top: 10px;
+}
+
+.resize-btn.locked {
+  background-color: var(--error-hover);
+}
+
+.m-0 {
+  margin: 0;
+}
