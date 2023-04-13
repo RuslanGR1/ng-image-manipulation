@@ -35,6 +35,7 @@ export class NativeImageManipulatorComponent implements OnInit {
   canvasHeight: string = DEFAULT_CANVAS_HEIGHT;
 
   private readonly resizeEnabledAttr = 'resizeEnabled';
+  private readonly rotateEnabledAttr = 'rotateEnabled';
 
   private readonly resultImageName = 'stage.png';
   private readonly imageObjectName = 'image';
@@ -109,6 +110,7 @@ export class NativeImageManipulatorComponent implements OnInit {
         draggable: true
       });
       loadedImage.setAttr(this.resizeEnabledAttr, false);
+      loadedImage.setAttr(this.rotateEnabledAttr, false);
 
       if (!this._layer || !this._transformer) {
         return;
@@ -144,9 +146,11 @@ export class NativeImageManipulatorComponent implements OnInit {
 
     if (e.target.hasName(this.imageObjectName)) {
       const resizeEnabled = e.target?.getAttr(this.resizeEnabledAttr);
+      const rotateEnabled = e.target?.getAttr(this.rotateEnabledAttr);
       const imageScale = e.target?.scale();
       this.imageScale = String(imageScale?.x) || '1';
       this._transformer?.resizeEnabled(resizeEnabled);
+      this._transformer?.rotateEnabled(rotateEnabled);
     }
 
     const transformerIndex = this._transformer?.zIndex();
@@ -206,6 +210,7 @@ export class NativeImageManipulatorComponent implements OnInit {
       enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
       keepRatio: true,
       resizeEnabled: false,
+      rotateEnabled: false,
       boundBoxFunc
     });
   }
@@ -253,8 +258,12 @@ export class NativeImageManipulatorComponent implements OnInit {
       return;
     }
     const scaleEnabld = this.lastSelectedObject.getAttr(this.resizeEnabledAttr);
+    const rotateEnabld = this.lastSelectedObject.getAttr(this.resizeEnabledAttr);
+
     this.lastSelectedObject.setAttr(this.resizeEnabledAttr, !scaleEnabld);
+    this.lastSelectedObject.setAttr(this.rotateEnabledAttr, !rotateEnabld);
     this._transformer?.resizeEnabled(!scaleEnabld);
+    this._transformer?.rotateEnabled(!rotateEnabld);
   }
 
   addOrChangeText(): void {
