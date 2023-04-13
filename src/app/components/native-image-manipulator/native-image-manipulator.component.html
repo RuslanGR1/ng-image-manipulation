@@ -30,7 +30,7 @@
     <div id="container"></div>
     <div class="bottom-line">
       <div class="actions">
-        <h3 class="actions-title">Actions for selected image:</h3>
+        <h3 class="actions-title">Actions for selected Object:</h3>
         <div class="action action-priority">
           <p class="action-title">Layer Priority</p>
           <button
@@ -67,6 +67,30 @@
             </button>
           </div>
         </div>
+        <div class="action scale-action">
+          <p class="action-title">Image Scale</p>
+          <input
+            [disabled]="!isImageNodeSelected()"
+            [(ngModel)]="imageScale"
+            type="number"
+            class="default-input opacity-input"
+          />
+          <button [disabled]="!isImageNodeSelected()" (click)="changeSelectedImageScale()" class="btn btn-ml">
+            Apply
+          </button>
+        </div>
+        <div class="action-toggle-resize d-flex align-center">
+          <p>Object Resize State</p>
+          <button
+            (click)="toggleScale()"
+            class="btn btn-ml resize-btn"
+            [disabled]="!isDeleteButtonActive()"
+            [ngClass]="{locked: !isResizeEnabled()}"
+          >
+            <p class="m-0" *ngIf="isResizeEnabled()">Unlocked</p>
+            <p class="m-0" *ngIf="!isResizeEnabled()">Locked</p>
+          </button>
+        </div>
         <div class="action action-delete">
           <button [disabled]="!isDeleteButtonActive()" class="btn delete-btn" (click)="deleteSelectedObject()">
             Delete selected Object
@@ -82,20 +106,9 @@
             <p *ngIf="!isTextNodeSelected()">Add new text</p>
           </button>
         </div>
-        <div class="action-toggle-resize d-flex align-center">
-          <p>Image Resize State:</p>
-          <button
-            (click)="toggleScale()"
-            class="btn btn-ml resize-btn"
-            [disabled]="!isDeleteButtonActive()"
-            [ngClass]="{locked: !isResizeEnabled()}"
-          >
-            <p class="m-0" *ngIf="isResizeEnabled()">Unlocked</p>
-            <p class="m-0" *ngIf="!isResizeEnabled()">Locked</p>
-          </button>
-        </div>
+        <h3 class="canvas-title">Canvas Actions:</h3>
         <div class="canvas-action d-flex align-center">
-          <p>Canvas Size:</p>
+          <p>Canvas Size</p>
           <p>Width <input [(ngModel)]="canvasWidth" type="text" class="default-input canvas-input" /></p>
           <p>Height <input [(ngModel)]="canvasHeight" type="number" class="default-input canvas-input" /></p>
           <button [disabled]="!isCanvasResizeButtonActive()" (click)="resizeCanvas()" class="btn">Apply</button>

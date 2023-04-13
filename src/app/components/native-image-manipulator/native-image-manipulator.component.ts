@@ -27,6 +27,8 @@ export class NativeImageManipulatorComponent implements OnInit {
   lastSelectedObject: Stage | Konva.Shape | undefined;
   priorityAction = ChangePriorityAction;
   imageUrls: string[] = [];
+
+  imageScale: string = '';
   noteText: string = '';
   opacityText: string = '';
   canvasWidth: string = DEFAULT_CANVAS_WIDTH;
@@ -120,6 +122,7 @@ export class NativeImageManipulatorComponent implements OnInit {
 
       this._transformer.nodes([loadedImage]);
       this.opacityText = String(DEFAULT_IMAGE_OPACITY);
+      this.imageScale = String(loadedImage.scale()?.x);
       this.lastSelectedObject = loadedImage;
     };
   }
@@ -130,6 +133,7 @@ export class NativeImageManipulatorComponent implements OnInit {
       this.lastSelectedObject = undefined;
       this.noteText = '';
       this.opacityText = '';
+      this.imageScale = '';
       return;
     }
 
@@ -139,8 +143,10 @@ export class NativeImageManipulatorComponent implements OnInit {
     }
 
     if (e.target.hasName(this.imageObjectName)) {
-      const scaleEnabld = e.target?.getAttr(this.resizeEnabledAttr);
-      this._transformer?.resizeEnabled(scaleEnabld);
+      const resizeEnabled = e.target?.getAttr(this.resizeEnabledAttr);
+      const imageScale = e.target?.scale();
+      this.imageScale = String(imageScale?.x) || '1';
+      this._transformer?.resizeEnabled(resizeEnabled);
     }
 
     const transformerIndex = this._transformer?.zIndex();
@@ -218,6 +224,15 @@ export class NativeImageManipulatorComponent implements OnInit {
 
   isCanvasResizeButtonActive(): boolean {
     return !!(this.canvasWidth || this.canvasHeight);
+  }
+
+  isImageNodeSelected(): boolean {
+    return this.lastSelectedObject instanceof Konva.Image;
+  }
+
+  changeSelectedImageScale(): void {
+    const scale = { x: +this.imageScale, y: +this.imageScale };
+    this.lastSelectedObject?.scale(scale);
   }
 
   resizeCanvas(): void {

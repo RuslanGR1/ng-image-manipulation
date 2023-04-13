@@ -3,6 +3,7 @@
   background-color: var(--gray);
   min-height: calc(100vh-20px);
   padding-top: 20px;
+  padding-bottom: 20px;
   font-family: sans-serif;
   width: 90%;
   margin: auto;
@@ -72,8 +73,8 @@
   justify-content: start;
 }
 
-.action-opacity .action-title,
-.action-priority .action-title {
+.action .action-title,
+.action .action-title {
   margin-right: 10px;
 }
 
@@ -177,4 +178,15 @@
 
 .canvas-action {
   gap: 10px;
+  padding: 7px 0;
+  margin-top: 14px;
+}
+
+.canvas-action p {
+  margin: 0;
+}
+
+.canvas-title {
+  margin: 0;
+  margin-top: 22px;
 }

@@ -11,4 +11,4 @@ export const defaultTextPositionPoint: Point = { x: 50, y: 50 };
 export const defaultImagePositionPoint: Point = { x: 50, y: 70 };
 
 export const DEFAULT_CANVAS_WIDTH = '1000';
-export const DEFAULT_CANVAS_HEIGHT = '600';
+export const DEFAULT_CANVAS_HEIGHT = '500';
