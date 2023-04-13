@@ -5,6 +5,8 @@ import { Box } from 'konva/lib/shapes/Transformer';
 import {
   defaultImagePositionPoint,
   defaultTextPositionPoint,
+  DEFAULT_CANVAS_HEIGHT,
+  DEFAULT_CANVAS_WIDTH,
   DEFAULT_IMAGE_OPACITY
 } from './native-image-manipulator.const';
 import { ImageManipulatorService } from './native-image-manipulator.service';
@@ -27,6 +29,8 @@ export class NativeImageManipulatorComponent implements OnInit {
   imageUrls: string[] = [];
   noteText: string = '';
   opacityText: string = '';
+  canvasWidth: string = DEFAULT_CANVAS_WIDTH;
+  canvasHeight: string = DEFAULT_CANVAS_HEIGHT;
 
   private readonly resizeEnabledAttr = 'resizeEnabled';
 
@@ -173,8 +177,8 @@ export class NativeImageManipulatorComponent implements OnInit {
   private createAndConfigureStage(): void {
     this._stage = new Stage({
       container: 'container',
-      width: 1000,
-      height: 600
+      width: Number(this.canvasWidth),
+      height: Number(this.canvasHeight)
     });
     this._stage.on(UserAction.ClickTap, (e) => this.stageOnClickTap(e));
   }
@@ -210,6 +214,23 @@ export class NativeImageManipulatorComponent implements OnInit {
 
   isTextNodeSelected(): boolean {
     return this.lastSelectedObject instanceof Konva.Text;
+  }
+
+  isCanvasResizeButtonActive(): boolean {
+    return !!(this.canvasWidth || this.canvasHeight);
+  }
+
+  resizeCanvas(): void {
+    const width = Number(this.canvasWidth);
+    const height = Number(this.canvasHeight);
+    if (width) {
+      this._stage?.width(width);
+      this._backgrounLayer?.width(width);
+    }
+    if (height) {
+      this._stage?.height(height);
+      this._backgrounLayer?.height(height);
+    }
   }
 
   toggleScale(): void {

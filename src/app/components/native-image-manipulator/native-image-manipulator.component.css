@@ -174,3 +174,7 @@
 .m-0 {
   margin: 0;
 }
+
+.canvas-action {
+  gap: 10px;
+}

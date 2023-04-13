@@ -83,7 +83,7 @@
           </button>
         </div>
         <div class="action-toggle-resize d-flex align-center">
-          <p>Scaling state</p>
+          <p>Image Resize State:</p>
           <button
             (click)="toggleScale()"
             class="btn btn-ml resize-btn"
@@ -93,6 +93,12 @@
             <p class="m-0" *ngIf="isResizeEnabled()">Unlocked</p>
             <p class="m-0" *ngIf="!isResizeEnabled()">Locked</p>
           </button>
+        </div>
+        <div class="canvas-action d-flex align-center">
+          <p>Canvas Size:</p>
+          <p>Width <input [(ngModel)]="canvasWidth" type="text" class="default-input canvas-input" /></p>
+          <p>Height <input [(ngModel)]="canvasHeight" type="number" class="default-input canvas-input" /></p>
+          <button [disabled]="!isCanvasResizeButtonActive()" (click)="resizeCanvas()" class="btn">Apply</button>
         </div>
       </div>
     </div>
