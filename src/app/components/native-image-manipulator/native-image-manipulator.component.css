@@ -169,7 +169,7 @@
 }
 
 .resize-btn.locked {
-  background-color: var(--error-hover);
+  background-color: var(--error-text);
 }
 
 .m-0 {
